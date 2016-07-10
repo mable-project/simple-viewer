@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<meta charset='utf-8'>
+<body>
+<div id='map'></div>
+<script src='http://d3js.org/d3.v3.min.js'></script>
+<script>
+(function() {
+  var geojsonUrl = 'https://gist.githubusercontent.com/anonymous/05373489139c88ffea61c8ae66811b42/raw/6ac32bdd6cabedf66a1fde5f5c1a9dbfabd9c29b/overpass.geojson'; // Default GeoJSON URL
+  var scale = 500000;
+  var urlParams = location.search.substring(1).split('&');
+  for(var i=0; urlParams[i]; i++) {
+    var param = urlParams[i].split('=');
+    if(param[0] === 'geojson') {
+      geojsonUrl = param[1]
+    }
+    if(param[0] === 'scale') {
+      scale = param[1]
+    }
+  }
+  var g,
+    width = 900,
+    height = 650;
+
+  map = d3.select('#map').append('svg')
+    .attr('width', width)
+    .attr('height', height)
+    .append('g');
+
+  d3.json(geojsonUrl, function(json) {
+    var projection, path;
+
+    projection = d3.geo.mercator()
+      .scale(scale)
+      .center(d3.geo.centroid(json))
+      .translate([width / 2, height / 2]);
+
+    path = d3.geo.path().projection(projection);
+
+    map.selectAll('path')
+    .data(json.features)
+    .enter()
+    .append('path')
+    .attr('d', path)
+    .attr('fill', 'rgba(0,0,0,0)')
+    .attr('stroke','rgba(0,0,0,1)' );
+  });
+})();
+</script>
+</body>
